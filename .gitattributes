@@ -1,0 +1,16 @@
+# Normalize text files to LF in repo, keep CRLF on checkout (Windows friendly)
+* text=auto eol=lf
+
+# Treat these as text explicitly
+*.java text diff=java
+*.md text
+*.properties text
+*.bat text eol=crlf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.ico binary
+
+# Diff settings
+*.java diff=java

@@ -1,0 +1,38 @@
+# === Build artifacts ===
+/bin/
+/out/
+/target/
+/build/
+*.class
+
+# === Package managers / archives ===
+*.jar
+*.war
+*.ear
+
+# === IDE / Editor metadata ===
+.idea/
+.vscode/
+*.iml
+.classpath
+.project
+.settings/
+
+# === OS generated files ===
+.DS_Store
+Thumbs.db
+
+# === Logs / temp ===
+*.log
+hs_err_pid*.log
+replay_pid*.log
+*.tmp
+*.swp
+
+# === Coverage / reports ===
+coverage/
+reports/
+
+# === Misc ===
+*.bak
+~$*
