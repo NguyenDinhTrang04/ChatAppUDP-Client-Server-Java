@@ -1,25 +1,25 @@
-# Chính sách bảo mật
+# Security Policy
 
-## Báo cáo lỗ hổng
+## Reporting Vulnerabilities
 
-Nếu bạn phát hiện vấn đề bảo mật, vui lòng:
+If you discover a security issue, please:
 
-1. Không công khai ngay.
-2. Mô tả chi tiết (môi trường, bước tái hiện).
-3. Gửi qua issue private (nếu được) hoặc email quản trị: trangnguyendinh17@gmail.com
+1. Do not disclose publicly immediately.
+2. Describe in detail (environment, reproduction steps).
+3. Send via private issue (if possible) or email administrator: trangnguyendinh17@gmail.com
 
-## Phạm vi
+## Scope
 
--   Rò rỉ thông tin người dùng
--   Tấn công từ chối dịch vụ (DoS) nghiêm trọng
--   Thực thi mã từ xa
+-   User information leakage
+-   Serious Denial of Service (DoS) attacks
+-   Remote code execution
 
-## Không nằm trong phạm vi
+## Out of Scope
 
--   Lỗi UI nhỏ
--   Crash do sử dụng sai không theo hướng dẫn
+-   Minor UI bugs
+-   Crashes due to improper usage not following guidelines
 
-## Khuyến nghị hiện tại
+## Current Recommendations
 
--   Chạy server trên mạng tin cậy.
--   Có thể bổ sung mã hóa ở tầng ứng dụng trong tương lai.
+-   Run server on trusted networks.
+-   May add application-layer encryption in the future.

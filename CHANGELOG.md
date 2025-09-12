@@ -1,6 +1,6 @@
 # Changelog
 
-Tuân theo chuẩn dạng Keep a Changelog (rút gọn) và Semantic Versioning.
+Following Keep a Changelog format (simplified) and Semantic Versioning.
 
 ## [Unreleased]
 
@@ -10,4 +10,4 @@ Tuân theo chuẩn dạng Keep a Changelog (rút gọn) và Semantic Versioning.
 
 ### Added
 
--   Phiên bản đầu tiên: Server & Client UDP chat với GUI Swing, hỗ trợ public & private message, danh sách user online.
+-   First version: Server & Client UDP chat with Swing GUI, supporting public & private messages, online user list.

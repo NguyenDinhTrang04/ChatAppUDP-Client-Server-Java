@@ -1,23 +1,23 @@
-# Quy tắc ứng xử
+# Code of Conduct
 
-Dự án tuân theo nguyên tắc tôn trọng và cởi mở.
+This project follows principles of respect and openness.
 
-## Nguyên tắc chính
+## Core Principles
 
--   Tôn trọng mọi người.
--   Không quấy rối, không phân biệt đối xử.
--   Chấp nhận góp ý mang tính xây dựng.
+-   Respect everyone.
+-   No harassment, no discrimination.
+-   Accept constructive feedback.
 
-## Hành vi không chấp nhận
+## Unacceptable Behavior
 
--   Ngôn từ xúc phạm, thù địch.
--   Quấy rối cá nhân hoặc nhóm.
--   Chia sẻ thông tin cá nhân người khác mà không được phép.
+-   Offensive, hostile language.
+-   Personal or group harassment.
+-   Sharing others' personal information without permission.
 
-## Báo cáo vi phạm
+## Reporting Violations
 
-Tạo issue với nhãn `abuse` hoặc liên hệ người quản lý repository qua email: trangnguyendinh17@gmail.com.
+Create an issue with the `abuse` label or contact the repository administrator via email: trangnguyendinh17@gmail.com.
 
-## Hệ quả
+## Consequences
 
-Vi phạm có thể dẫn đến cảnh cáo hoặc chặn đóng góp.
+Violations may result in warnings or contribution bans.

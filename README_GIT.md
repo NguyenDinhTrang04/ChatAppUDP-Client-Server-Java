@@ -1,6 +1,6 @@
-# Hướng dẫn đẩy dự án lên GitHub
+# Guide to Push Project to GitHub
 
-## 1. Khởi tạo repo (nếu chưa)
+## 1. Initialize repo (if not done)
 
 ```
 git init
@@ -8,28 +8,28 @@ git add .
 git commit -m "chore: initial project with structure"
 ```
 
-## 2. Kết nối remote
+## 2. Connect remote
 
 ```
 git remote add origin https://github.com/<username>/<repo>.git
 ```
 
-## 3. Đẩy code
+## 3. Push code
 
 ```
 git push -u origin main
 ```
 
-(Nếu nhánh mặc định là `master` thì thay bằng `master`).
+(If default branch is `master`, replace with `master`).
 
-## 4. Tag phiên bản (tuỳ chọn)
+## 4. Tag version (optional)
 
 ```
 git tag -a v1.0.0 -m "First stable release"
 git push origin v1.0.0
 ```
 
-## 5. Cập nhật sau này
+## 5. Future updates
 
 ```
 git add .
@@ -37,7 +37,7 @@ git commit -m "feat: ..."
 git push
 ```
 
-## 6. Pull thay đổi mới nhất
+## 6. Pull latest changes
 
 ```
 git pull

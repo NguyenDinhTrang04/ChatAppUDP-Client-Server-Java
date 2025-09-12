@@ -1,140 +1,140 @@
 # UDP Chat Application
 
-Ứng dụng chat sử dụng giao thức UDP được viết bằng Java với giao diện Swing.
+A UDP-based chat application written in Java with Swing GUI interface.
 
-## Cấu trúc dự án
+## Project Structure
 
 ```
 ChatAppUDP/
 ├── resources/
-│   ├── config.properties       # File cấu hình
-│   └── ui/                     # Tài nguyên UI (nếu có)
+│   ├── config.properties       # Configuration file
+│   └── ui/                     # UI resources (if any)
 ├── src/
-│   ├── Main.java              # Launcher chính
-│   ├── client/                # Package client
-│   │   ├── ClientApp.java     # Main class cho client
-│   │   ├── ClientController.java # Logic điều khiển client
-│   │   ├── ClientHandler.java # Xử lý tin nhắn từ server
+│   ├── Main.java              # Main launcher
+│   ├── client/                # Client package
+│   │   ├── ClientApp.java     # Main class for client
+│   │   ├── ClientController.java # Client control logic
+│   │   ├── ClientHandler.java # Message handler from server
 │   │   └── gui/
-│   │       └── ChatUI.java    # Giao diện chat client
-│   ├── common/                # Package chung
-│   │   ├── Constants.java     # Các hằng số
-│   │   ├── Message.java       # Class tin nhắn
-│   │   └── Utils.java         # Các tiện ích
-│   └── server/                # Package server
-│       ├── ServerApp.java     # Main class cho server
-│       ├── ServerController.java # Logic điều khiển server
-│       ├── ServerHandler.java # Xử lý tin nhắn từ client
+│   │       └── ChatUI.java    # Client chat interface
+│   ├── common/                # Common package
+│   │   ├── Constants.java     # Constants
+│   │   ├── Message.java       # Message class
+│   │   └── Utils.java         # Utilities
+│   └── server/                # Server package
+│       ├── ServerApp.java     # Main class for server
+│       ├── ServerController.java # Server control logic
+│       ├── ServerHandler.java # Message handler from clients
 │       └── gui/
-│           └── ServerUI.java  # Giao diện server
+│           └── ServerUI.java  # Server interface
 ```
 
-## Tính năng
+## Features
 
 ### Server
 
-- Khởi động/dừng server trên port tùy chọn
-- Quản lý danh sách clients kết nối
-- Hiển thị log hoạt động realtime
-- Giao diện quản trị trực quan
+-   Start/stop server on custom port
+-   Manage connected clients list
+-   Real-time activity logging
+-   Visual administration interface
 
 ### Client
 
-- Kết nối đến server với username
-- Gửi tin nhắn public cho tất cả users
-- Gửi tin nhắn private (@username message)
-- Hiển thị danh sách users online
-- Giao diện chat thân thiện
+-   Connect to server with username
+-   Send public messages to all users
+-   Send private messages (@username message)
+-   Display online users list
+-   User-friendly chat interface
 
-## Cách sử dụng
+## Usage
 
-### Chạy ứng dụng
+### Running the application
 
-1. **Compile toàn bộ dự án:**
+1. **Compile the entire project:**
 
-   ```bash
-   javac -d . src/**/*.java
-   ```
+    ```bash
+    javac -d . src/**/*.java
+    ```
 
-2. **Chạy launcher chính:**
-   ```bash
-   java Main
-   ```
-   Chọn "Server" hoặc "Client" từ dialog.
+2. **Run the main launcher:**
+    ```bash
+    java Main
+    ```
+    Choose "Server" or "Client" from the dialog.
 
-### Hoặc chạy riêng biệt:
+### Or run separately:
 
-**Chạy Server:**
+**Run Server:**
 
 ```bash
 java server.ServerApp
 ```
 
-**Chạy Client:**
+**Run Client:**
 
 ```bash
 java client.ClientApp
 ```
 
-## Hướng dẫn sử dụng
+## User Guide
 
 ### Server
 
-1. Nhập port muốn sử dụng (mặc định: 8888)
+1. Enter the port you want to use (default: 8888)
 2. Click "Start Server"
-3. Server sẽ hiển thị log hoạt động và danh sách clients
+3. Server will display activity logs and client list
 
 ### Client
 
-1. Nhập thông tin server (host, port)
-2. Nhập username (2-20 ký tự, không chứa ký tự đặc biệt)
+1. Enter server information (host, port)
+2. Enter username (2-20 characters, no special characters)
 3. Click "Connect"
-4. Sau khi kết nối thành công:
-   - Gõ tin nhắn và Enter để gửi public message
-   - Gõ `@username message` để gửi private message
-   - Double-click vào user trong danh sách để bắt đầu private chat
+4. After successful connection:
+    - Type message and press Enter to send public message
+    - Type `@username message` to send private message
+    - Double-click on user in the list to start private chat
 
-## Giao thức tin nhắn
+## Message Protocol
 
-Tin nhắn được serialize theo format:
+Messages are serialized in the format:
 
 ```
 TYPE|SENDER|CONTENT|TIMESTAMP|RECIPIENT
 ```
 
-### Các loại tin nhắn:
+### Message types:
 
-- `JOIN`: Yêu cầu tham gia chat
-- `LEAVE`: Yêu cầu rời khỏi chat
-- `TEXT`: Tin nhắn text
-- `NOTIFICATION`: Thông báo hệ thống
-- `USER_LIST`: Danh sách users online
+-   `JOIN`: Request to join chat
+-   `LEAVE`: Request to leave chat
+-   `TEXT`: Text message
+-   `NOTIFICATION`: System notification
+-   `USER_LIST`: Online users list
 
-## Cấu hình
+## Configuration
 
-File `resources/config.properties` chứa các cấu hình mặc định:
+File `resources/config.properties` contains default configurations:
 
-- Port server mặc định
-- Kích thước buffer
-- Timeout kết nối
-- Cài đặt UI
+-   Default server port
+-   Buffer size
+-   Connection timeout
+-   UI settings
 
-## Yêu cầu hệ thống
+## System Requirements
 
-- Java 8 hoặc cao hơn
-- Hệ điều hành hỗ trợ Java Swing
-- Quyền truy cập mạng (firewall có thể cần cấu hình)
+-   Java 8 or higher
+-   Operating system supporting Java Swing
+-   Network access (firewall may need configuration)
 
-## Lưu ý
+## Notes
 
-- Server phải được khởi động trước khi clients kết nối
-- Mỗi client cần username unique
-- Ứng dụng sử dụng UDP nên có thể mất tin nhắn trong mạng không ổn định
-- Private message có format: `@recipient message content`
+-   Server must be started before clients connect
+-   Each client needs a unique username
+-   Application uses UDP so messages may be lost on unstable networks
+-   Private message format: `@recipient message content`
 
-## Xử lý lỗi
+## Error Handling
 
-- Kiểm tra port không bị chiếm dụng
-- Đảm bảo firewall cho phép kết nối
-- Username phải hợp lệ (2-20 ký tự)
-- Server phải chạy trước khi client kết nối
+-   Check that port is not occupied
+-   Ensure firewall allows connections
+-   Username must be valid (2-20 characters)
+-   Server must be running before client connects

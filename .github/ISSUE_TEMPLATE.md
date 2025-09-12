@@ -1,22 +1,22 @@
-# Mô tả lỗi
+# Bug Description
 
-Mô tả ngắn gọn.
+Brief description.
 
-## Cách tái hiện
+## Steps to Reproduce
 
 1. ...
 2. ...
 
-## Kỳ vọng
+## Expected Behavior
 
-Điều bạn mong đợi.
+What you expected to happen.
 
-## Thông tin môi trường
+## Environment Information
 
 -   OS:
 -   Java version:
 -   Mode: Server / Client
 
-## Log / Ảnh chụp màn hình
+## Logs / Screenshots
 
-(Đính kèm nếu có)
+(Attach if available)

@@ -1,45 +1,45 @@
-# Hướng dẫn đóng góp
+# Contributing Guide
 
-Cảm ơn bạn đã quan tâm đến dự án UDP Chat Application!
+Thank you for your interest in the UDP Chat Application project!
 
-## Quy trình chung
+## General Workflow
 
-1. Fork repository và tạo branch mới: `feature/ten-tinh-nang` hoặc `fix/ten-loi`.
-2. Viết code tuân theo style hiện tại, giữ tên biến rõ ràng.
-3. Đảm bảo build thành công bằng `run.bat`.
-4. Kiểm tra thủ công chức năng liên quan (server, client, private message, ...).
-5. Cập nhật `README.md` hoặc `CHANGELOG.md` nếu cần.
-6. Tạo Pull Request mô tả rõ thay đổi, ảnh minh họa (nếu có).
+1. Fork the repository and create a new branch: `feature/feature-name` or `fix/bug-name`.
+2. Write code following the current style, keep variable names clear.
+3. Ensure successful build using `run.bat`.
+4. Manually test related functionality (server, client, private message, etc.).
+5. Update `README.md` or `CHANGELOG.md` if needed.
+6. Create Pull Request with clear description of changes, include screenshots if applicable.
 
-## Commit message
+## Commit Messages
 
-Sử dụng định dạng đề xuất:
+Use the suggested format:
 
--   `feat: thêm tính năng ...`
--   `fix: sửa lỗi ...`
--   `refactor: chỉnh sửa cấu trúc ...`
--   `docs: cập nhật tài liệu ...`
--   `chore: việc lặt vặt ...`
+-   `feat: add feature ...`
+-   `fix: fix bug ...`
+-   `refactor: restructure ...`
+-   `docs: update documentation ...`
+-   `chore: misc tasks ...`
 
-## Code style
+## Code Style
 
 -   Java 8+.
--   Tránh logic phức tạp trong UI; đưa vào controller/handler.
--   Sử dụng hằng số trong `Constants`.
+-   Avoid complex logic in UI; move to controller/handler.
+-   Use constants in `Constants`.
 
-## Báo lỗi (Issue)
+## Bug Reports (Issues)
 
-Khi tạo issue, vui lòng cung cấp:
+When creating an issue, please provide:
 
--   Mô tả lỗi
--   Cách tái hiện
--   Kỳ vọng vs thực tế
--   Môi trường (OS, Java version)
+-   Bug description
+-   Steps to reproduce
+-   Expected vs actual behavior
+-   Environment (OS, Java version)
 
-## Tính năng gợi ý
+## Feature Suggestions
 
-Bạn có thể đề xuất: mã hóa tin nhắn, file transfer, chat room, logging ra file, v.v.
+You can suggest: message encryption, file transfer, chat rooms, file logging, etc.
 
-## Liên hệ
+## Contact
 
-Mở issue hoặc tạo PR để thảo luận. Liên hệ trực tiếp: trangnguyendinh17@gmail.com
+Open an issue or create a PR for discussion. Direct contact: trangnguyendinh17@gmail.com

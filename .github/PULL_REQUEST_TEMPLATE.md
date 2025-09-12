@@ -1,8 +1,8 @@
-# Mô tả
+# Description
 
-Mô tả ngắn gọn thay đổi.
+Brief description of changes.
 
-## Loại thay đổi
+## Type of Change
 
 -   [ ] Feat
 -   [ ] Fix
@@ -10,17 +10,17 @@ Mô tả ngắn gọn thay đổi.
 -   [ ] Docs
 -   [ ] Chore
 
-## Đã kiểm tra?
+## Tested?
 
--   [ ] Build thành công
--   [ ] Test thủ công server
--   [ ] Test thủ công client
--   [ ] Không lỗi mới trong console
+-   [ ] Build successful
+-   [ ] Manual server test
+-   [ ] Manual client test
+-   [ ] No new console errors
 
-## Liên quan issue
+## Related Issue
 
 Closes #
 
-## Ảnh / GIF (nếu có)
+## Screenshots / GIF (if any)
 
-## Ghi chú khác
+## Additional Notes
