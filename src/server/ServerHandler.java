@@ -82,7 +82,7 @@ public class ServerHandler {
             return;
         }
         
-        // Thêm client vào danh sách
+        // Thêm client vào danh sách (sẽ broadcast user list cho tất cả clients)
         serverController.addClient(username, clientAddress);
         
         // Gửi thông báo thành công
@@ -92,6 +92,15 @@ public class ServerHandler {
             "Successfully joined the chat!"
         );
         serverController.sendToClient(successMessage, clientAddress);
+        
+        // Đảm bảo client mới nhận được danh sách user hiện tại (gửi lại để chắc chắn)
+        // Delay nhỏ để đảm bảo client đã sẵn sàng nhận
+        try {
+            Thread.sleep(100); // 100ms delay
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        serverController.sendUserListToClient(clientAddress);
         
         System.out.println("User " + username + " joined from " + clientAddress);
     }

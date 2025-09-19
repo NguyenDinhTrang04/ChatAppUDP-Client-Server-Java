@@ -140,13 +140,9 @@ public class ChatUI extends JFrame implements ClientController.MessageListener {
         JSplitPane centerPanel = createChatCenterPanel();
         panel.add(centerPanel, BorderLayout.CENTER);
         
-        // Bottom panel - Message input
-        JPanel bottomPanel = createChatBottomPanel();
+        // Bottom panel - Message input và status kết hợp
+        JPanel bottomPanel = createCombinedBottomPanel();
         panel.add(bottomPanel, BorderLayout.SOUTH);
-        
-        // Status panel
-        JPanel statusPanel = createChatStatusPanel();
-        panel.add(statusPanel, BorderLayout.PAGE_END);
         
         return panel;
     }
@@ -204,6 +200,23 @@ public class ChatUI extends JFrame implements ClientController.MessageListener {
         return splitPane;
     }
     
+    /**
+     * Tạo panel bottom kết hợp message input và status
+     */
+    private JPanel createCombinedBottomPanel() {
+        JPanel combinedPanel = new JPanel(new BorderLayout());
+        
+        // Message input panel
+        JPanel messagePanel = createChatBottomPanel();
+        combinedPanel.add(messagePanel, BorderLayout.CENTER);
+        
+        // Status panel
+        JPanel statusPanel = createChatStatusPanel();
+        combinedPanel.add(statusPanel, BorderLayout.SOUTH);
+        
+        return combinedPanel;
+    }
+
     /**
      * Tạo panel bottom của chat
      */

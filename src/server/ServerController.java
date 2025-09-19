@@ -167,7 +167,7 @@ public class ServerController {
     /**
      * Gửi danh sách users cho một client cụ thể
      */
-    private void sendUserList(InetSocketAddress clientAddress) {
+    public void sendUserListToClient(InetSocketAddress clientAddress) {
         StringBuilder userList = new StringBuilder();
         for (String username : connectedClients.keySet()) {
             if (userList.length() > 0) {
@@ -183,6 +183,7 @@ public class ServerController {
         );
         
         sendToClient(userListMessage, clientAddress);
+        System.out.println("Sent user list to client: " + clientAddress + " - Users: " + userList.toString());
     }
     
     /**
@@ -203,6 +204,7 @@ public class ServerController {
             userList.toString()
         );
         
+        System.out.println("Broadcasting user list to " + connectedClients.size() + " clients - Users: " + userList.toString());
         broadcastMessage(userListMessage);
     }
     
