@@ -164,30 +164,66 @@ public class ServerController {
     /**
      * Thêm client mới
      */
-    public synchronized void addClient(String username, InetSocketAddress address) {
-        try {
-            // Kiểm tra lại để đảm bảo
-            if (connectedClients.containsKey(username)) {
-                System.err.println("Warning: Attempted to add duplicate username: " + username);
-                return;
-            }
-            
-            connectedClients.put(username, address);
-            log("Client added: " + username + " from " + address + 
-                             " (Total clients: " + connectedClients.size() + ")");
-            
-            // Gửi thông báo user joined
-            Message joinMessage = Utils.createSystemMessage(username + " joined the chat");
-            broadcastMessage(joinMessage, username);
-            
-            // Gửi danh sách users cho tất cả clients
-            broadcastUserList();
-            
-        } catch (Exception e) {
-            log("Error adding client " + username + ": " + e.getMessage());
-            e.printStackTrace();
+  public synchronized boolean addClient(String username, InetSocketAddress address) {
+    try {
+        // Validation 1: Username null hoặc empty
+        if (username == null || username.trim().isEmpty()) {
+            sendJoinResponse(address, false, "Invalid username: Username cannot be empty");
+            log("Join rejected - Invalid username from " + address);
+            return false;
         }
+        
+        // Validation 2: Username đã tồn tại
+        if (connectedClients.containsKey(username.trim())) {
+            sendJoinResponse(address, false, "Username '" + username + "' is already taken. Please choose another name.");
+            log("Join rejected - Duplicate username '" + username + "' from " + address);
+            return false;
+        }
+        
+        // Validation 3: Kiểm tra địa chỉ IP đã có username khác chưa
+        String existingUser = findUserByAddress(address);
+        if (existingUser != null) {
+            sendJoinResponse(address, false, "This IP address is already connected as '" + existingUser + "'");
+            log("Join rejected - IP " + address + " already connected as '" + existingUser + "'");
+            return false;
+        }
+        
+        // // Validation 4: Kiểm tra số lượng client tối đa
+        // if (connectedClients.size() >= Constants.MAX_CLIENTS) {
+        //     sendJoinResponse(address, false, "Server is full. Maximum " + Constants.MAX_CLIENTS + " clients allowed.");
+        //     log("Join rejected - Server full from " + address);
+        //     return false;
+        // }
+        
+        // Thêm client thành công
+        connectedClients.put(username.trim(), address);
+        
+        // Gửi response thành công
+        sendJoinResponse(address, true, "Welcome to the chat, " + username + "!");
+        
+        log("Client added successfully: " + username + " from " + address + 
+            " (Total clients: " + connectedClients.size() + ")");
+        
+        // Thông báo cho các client khác
+        Message joinMessage = Utils.createSystemMessage(username + " joined the chat");
+        broadcastMessage(joinMessage, username);
+        
+        // Gửi user list cho tất cả
+        broadcastUserList();
+        
+        // Gửi user list riêng cho client mới (để đảm bảo)
+        Thread.sleep(100); // Small delay để đảm bảo client đã sẵn sàng
+        sendUserListToClient(address);
+        
+        return true;
+        
+    } catch (Exception e) {
+        sendJoinResponse(address, false, "Server error occurred. Please try again.");
+        log("Error adding client " + username + ": " + e.getMessage());
+        e.printStackTrace();
+        return false;
     }
+}
     
     /**
      * Kick user khỏi server (admin function)

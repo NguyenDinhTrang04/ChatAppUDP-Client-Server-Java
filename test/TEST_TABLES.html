@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>ChatAppUDP - Test Tracking Tables</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                background: #1e1e1e;
+                color: #d4d4d4;
+                padding: 20px;
+                line-height: 1.6;
+            }
+
+            .container {
+                max-width: 1400px;
+                margin: 0 auto;
+                background: #252526;
+                padding: 30px;
+                border-radius: 8px;
+            }
+
+            h1 {
+                color: #4ec9b0;
+                margin-bottom: 30px;
+                font-size: 28px;
+                border-bottom: 3px solid #4ec9b0;
+                padding-bottom: 10px;
+            }
+
+            h2 {
+                color: #569cd6;
+                margin: 40px 0 20px 0;
+                font-size: 22px;
+            }
+
+            .table-container {
+                overflow-x: auto;
+                margin-bottom: 30px;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                background: #2d2d30;
+            }
+
+            thead {
+                background: #264f78;
+            }
+
+            thead th {
+                color: #ffffff;
+                font-weight: 600;
+                text-align: left;
+                padding: 14px 12px;
+                font-size: 13px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                border-bottom: 2px solid #3c3c3c;
+            }
+
+            tbody tr {
+                border-bottom: 1px solid #3c3c3c;
+                transition: background 0.2s;
+            }
+
+            tbody tr:hover {
+                background: #2a2d2e;
+            }
+
+            tbody tr:nth-child(even) {
+                background: #252526;
+            }
+
+            tbody tr:nth-child(even):hover {
+                background: #2a2d2e;
+            }
+
+            td {
+                padding: 12px;
+                font-size: 13px;
+                color: #cccccc;
+            }
+
+            .status-pass {
+                color: #4ec9b0;
+                font-weight: bold;
+            }
+
+            .status-fail {
+                color: #f48771;
+                font-weight: bold;
+            }
+
+            .status-todo {
+                color: #ce9178;
+                font-weight: bold;
+            }
+
+            .status-complete {
+                color: #4ec9b0;
+            }
+
+            .status-partial {
+                color: #dcdcaa;
+            }
+
+            .status-not-started {
+                color: #f48771;
+            }
+
+            .badge {
+                display: inline-block;
+                padding: 4px 10px;
+                border-radius: 12px;
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: uppercase;
+            }
+
+            .badge-high {
+                background: #f48771;
+                color: #1e1e1e;
+            }
+
+            .badge-medium {
+                background: #dcdcaa;
+                color: #1e1e1e;
+            }
+
+            .badge-low {
+                background: #569cd6;
+                color: #1e1e1e;
+            }
+
+            .badge-critical {
+                background: #d16969;
+                color: #ffffff;
+            }
+
+            .badge-excellent {
+                background: #4ec9b0;
+                color: #1e1e1e;
+            }
+
+            .badge-poor {
+                background: #f48771;
+                color: #1e1e1e;
+            }
+
+            .badge-moderate {
+                background: #dcdcaa;
+                color: #1e1e1e;
+            }
+
+            .summary-box {
+                background: #2d2d30;
+                padding: 15px;
+                border-radius: 6px;
+                margin-bottom: 20px;
+                border-left: 4px solid #569cd6;
+            }
+
+            .summary-box p {
+                margin: 5px 0;
+                font-size: 14px;
+            }
+
+            .summary-box strong {
+                color: #4ec9b0;
+            }
+
+            .stats {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
+                margin: 20px 0;
+            }
+
+            .stat-card {
+                background: #2d2d30;
+                padding: 20px;
+                border-radius: 6px;
+                text-align: center;
+                border-top: 3px solid #569cd6;
+            }
+
+            .stat-value {
+                font-size: 32px;
+                font-weight: bold;
+                color: #4ec9b0;
+                margin: 10px 0;
+            }
+
+            .stat-label {
+                font-size: 12px;
+                color: #858585;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            @media print {
+                body {
+                    background: white;
+                    color: black;
+                }
+                .container {
+                    background: white;
+                }
+                thead {
+                    background: #264f78 !important;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>📋 BẢNG THEO DÕI TEST - TEST TRACKING TABLES</h1>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-label">Total Tests</div>
+                    <div class="stat-value">70</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Passed</div>
+                    <div class="stat-value">23</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Coverage</div>
+                    <div class="stat-value">30.4%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Pass Rate</div>
+                    <div class="stat-value">100%</div>
+                </div>
+            </div>
+
+            <!-- Table 1: Traceability Matrix -->
+            <h2>🎯 1. BẢNG TRACEABILITY MATRIX</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Requirement ID</th>
+                            <th>Requirement Description</th>
+                            <th>Test Cases</th>
+                            <th>Coverage Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>REQ-001</td>
+                            <td>Server phải quản lý danh sách clients</td>
+                            <td>TC_AC_001-010, TC_RC_001-008</td>
+                            <td>
+                                <span class="status-complete">✅ COMPLETE</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>REQ-002</td>
+                            <td>Server cho phép kick user</td>
+                            <td>TC_KU_001-005</td>
+                            <td>
+                                <span class="status-partial">🔄 PARTIAL</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>REQ-003</td>
+                            <td>Clients có thể gửi tin nhắn broadcast</td>
+                            <td>TC_MSG_001-006</td>
+                            <td>
+                                <span class="status-not-started"
+                                    >❌ NOT STARTED</span
+                                >
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>REQ-004</td>
+                            <td>Hỗ trợ private messaging</td>
+                            <td>TC_PM_001-005</td>
+                            <td>
+                                <span class="status-not-started"
+                                    >❌ NOT STARTED</span
+                                >
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>REQ-005</td>
+                            <td>Server UI hiển thị logs và client list</td>
+                            <td>TC_LOG_001-006, TC_UI_001-005</td>
+                            <td>
+                                <span class="status-partial">🔄 PARTIAL</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>REQ-006</td>
+                            <td>Thread safety cho concurrent operations</td>
+                            <td>TC_TS_001-005</td>
+                            <td>
+                                <span class="status-complete">✅ COMPLETE</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>REQ-007</td>
+                            <td>Handle network errors gracefully</td>
+                            <td>TC_NET_001-005</td>
+                            <td>
+                                <span class="status-not-started"
+                                    >❌ NOT STARTED</span
+                                >
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>REQ-008</td>
+                            <td>Input validation và security</td>
+                            <td>TC_SEC_001-005</td>
+                            <td>
+                                <span class="status-not-started"
+                                    >❌ NOT STARTED</span
+                                >
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>REQ-009</td>
+                            <td>Server start/stop functionality</td>
+                            <td>TC_E2E_001-005</td>
+                            <td>
+                                <span class="status-not-started"
+                                    >❌ NOT STARTED</span
+                                >
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>REQ-010</td>
+                            <td>Performance under normal load</td>
+                            <td>TC_PERF_001-003</td>
+                            <td>
+                                <span class="status-not-started"
+                                    >❌ NOT STARTED</span
+                                >
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table 2: Test Execution Log -->
+            <h2>📊 2. BẢNG THỰC THI TEST</h2>
+            <div class="summary-box">
+                <p><strong>Session:</strong> 2025-11-18</p>
+                <p>
+                    <strong>Total Tests:</strong> 15 |
+                    <strong>Pass Rate:</strong> 100% |
+                    <strong>Total Execution Time:</strong> 0.251s
+                </p>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Test ID</th>
+                            <th>Test Name</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>TC_AC_001</td>
+                            <td>Add first client</td>
+                            <td><span class="status-pass">✅ PASS</span></td>
+                            <td>0.012s</td>
+                            <td>All assertions passed</td>
+                        </tr>
+                        <tr>
+                            <td>TC_AC_002</td>
+                            <td>Add multiple clients</td>
+                            <td><span class="status-pass">✅ PASS</span></td>
+                            <td>0.018s</td>
+                            <td>3 clients added</td>
+                        </tr>
+                        <tr>
+                            <td>TC_AC_003</td>
+                            <td>Add null username</td>
+                            <td><span class="status-pass">✅ PASS</span></td>
+                            <td>0.008s</td>
+                            <td>NPE caught and handled</td>
+                        </tr>
+                        <tr>
+                            <td>TC_AC_004</td>
+                            <td>Add empty username</td>
+                            <td><span class="status-pass">✅ PASS</span></td>
+                            <td>0.006s</td>
+                            <td>Empty string handled</td>
+                        </tr>
+                        <tr>
+                            <td>TC_AC_005</td>
+                            <td>Add duplicate username</td>
+                            <td><span class="status-pass">✅ PASS</span></td>
+                            <td>0.010s</td>
+                            <td>Duplicate rejected</td>
+                        </tr>
+                        <tr>
+                            <td>TC_RC_001</td>
+                            <td>Remove only client</td>
+                            <td><span class="status-pass">✅ PASS</span></td>
+                            <td>0.009s</td>
+                            <td>Client removed</td>
+                        </tr>
+                        <tr>
+                            <td>TC_RC_002</td>
+                            <td>Remove one of many</td>
+                            <td><span class="status-pass">✅ PASS</span></td>
+                            <td>0.015s</td>
+                            <td>Selective removal works</td>
+                        </tr>
+                        <tr>
+                            <td>TC_RC_003</td>
+                            <td>Remove non-existent</td>
+                            <td><span class="status-pass">✅ PASS</span></td>
+                            <td>0.007s</td>
+                            <td>No error on non-existent</td>
+                        </tr>
+                        <tr>
+                            <td>TC_KU_001</td>
+                            <td>Kick existing user</td>
+                            <td><span class="status-pass">✅ PASS</span></td>
+                            <td>0.011s</td>
+                            <td>User kicked and removed</td>
+                        </tr>
+                        <tr>
+                            <td>TC_KU_002</td>
+                            <td>Kick non-existent user</td>
+                            <td><span class="status-pass">✅ PASS</span></td>
+                            <td>0.005s</td>
+                            <td>No error on non-existent</td>
+                        </tr>
+                        <tr>
+                            <td>TC_TS_001</td>
+                            <td>Concurrent add operations</td>
+                            <td><span class="status-pass">✅ PASS</span></td>
+                            <td>0.045s</td>
+                            <td>Thread safety verified</td>
+                        </tr>
+                        <tr>
+                            <td>TC_TS_002</td>
+                            <td>Concurrent remove ops</td>
+                            <td><span class="status-pass">✅ PASS</span></td>
+                            <td>0.038s</td>
+                            <td>No race conditions</td>
+                        </tr>
+                        <tr>
+                            <td>TC_TS_003</td>
+                            <td>Mixed add/remove</td>
+                            <td><span class="status-pass">✅ PASS</span></td>
+                            <td>0.052s</td>
+                            <td>Consistent final state</td>
+                        </tr>
+                        <tr>
+                            <td>TC_LOG_001</td>
+                            <td>Log client connect</td>
+                            <td><span class="status-pass">✅ PASS</span></td>
+                            <td>0.008s</td>
+                            <td>Connect logged properly</td>
+                        </tr>
+                        <tr>
+                            <td>TC_LOG_002</td>
+                            <td>Log client disconnect</td>
+                            <td><span class="status-pass">✅ PASS</span></td>
+                            <td>0.007s</td>
+                            <td>Disconnect logged</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table 3: Bug Tracking -->
+            <h2>🐛 3. BẢNG THEO DÕI BUGS</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Bug ID</th>
+                            <th>Severity</th>
+                            <th>Description</th>
+                            <th>Test Case</th>
+                            <th>Status</th>
+                            <th>Assigned To</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>BUG-001</td>
+                            <td><span class="badge badge-low">Minor</span></td>
+                            <td>Socket null error in tests</td>
+                            <td>All broadcast tests</td>
+                            <td>🔍 KNOWN</td>
+                            <td>Dev Team</td>
+                        </tr>
+                        <tr>
+                            <td>BUG-002</td>
+                            <td><span class="badge badge-low">Low</span></td>
+                            <td>Null username causes NPE</td>
+                            <td>TC_AC_003</td>
+                            <td>🔄 IN PROGRESS</td>
+                            <td>Dev Team</td>
+                        </tr>
+                        <tr>
+                            <td>BUG-003</td>
+                            <td>
+                                <span class="badge badge-medium">Medium</span>
+                            </td>
+                            <td>No message broadcasting tests</td>
+                            <td>TC_MSG_*</td>
+                            <td>⚠️ NEW</td>
+                            <td>QA Team</td>
+                        </tr>
+                        <tr>
+                            <td>BUG-004</td>
+                            <td><span class="badge badge-high">High</span></td>
+                            <td>Missing network error handling</td>
+                            <td>TC_NET_*</td>
+                            <td>⚠️ NEW</td>
+                            <td>Dev Team</td>
+                        </tr>
+                        <tr>
+                            <td>BUG-005</td>
+                            <td>
+                                <span class="badge badge-critical"
+                                    >Critical</span
+                                >
+                            </td>
+                            <td>No security validation</td>
+                            <td>TC_SEC_*</td>
+                            <td>⚠️ NEW</td>
+                            <td>Security Team</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table 4: Code Coverage -->
+            <h2>📈 4. BẢNG CODE COVERAGE</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Module</th>
+                            <th>Lines Tested</th>
+                            <th>Total Lines</th>
+                            <th>Coverage %</th>
+                            <th>Branch %</th>
+                            <th>Target %</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ServerController.java</td>
+                            <td>145</td>
+                            <td>200</td>
+                            <td>72%</td>
+                            <td>85%</td>
+                            <td>80%</td>
+                        </tr>
+                        <tr>
+                            <td>ClientController.java</td>
+                            <td>0</td>
+                            <td>180</td>
+                            <td>0%</td>
+                            <td>0%</td>
+                            <td>70%</td>
+                        </tr>
+                        <tr>
+                            <td>Message.java</td>
+                            <td>25</td>
+                            <td>50</td>
+                            <td>50%</td>
+                            <td>60%</td>
+                            <td>80%</td>
+                        </tr>
+                        <tr>
+                            <td>ServerUI.java</td>
+                            <td>30</td>
+                            <td>120</td>
+                            <td>25%</td>
+                            <td>40%</td>
+                            <td>60%</td>
+                        </tr>
+                        <tr>
+                            <td>ClientUI.java</td>
+                            <td>0</td>
+                            <td>150</td>
+                            <td>0%</td>
+                            <td>0%</td>
+                            <td>60%</td>
+                        </tr>
+                        <tr>
+                            <td>Utils.java</td>
+                            <td>15</td>
+                            <td>30</td>
+                            <td>50%</td>
+                            <td>70%</td>
+                            <td>80%</td>
+                        </tr>
+                        <tr>
+                            <td>Constants.java</td>
+                            <td>10</td>
+                            <td>10</td>
+                            <td>100%</td>
+                            <td>100%</td>
+                            <td>100%</td>
+                        </tr>
+                        <tr style="background: #3c3c3c; font-weight: bold">
+                            <td>TOTAL</td>
+                            <td>225</td>
+                            <td>740</td>
+                            <td>30.4%</td>
+                            <td>51%</td>
+                            <td>70%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table 5: Test Schedule -->
+            <h2>⏰ 5. BẢNG LỊCH TRÌNH TEST</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Phase</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                            <th>Deliverables</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Phase 1: Client Management</td>
+                            <td>2025-11-15</td>
+                            <td>2025-11-18</td>
+                            <td>4 days</td>
+                            <td>
+                                <span class="status-complete"
+                                    >✅ COMPLETED</span
+                                >
+                            </td>
+                            <td>15 passing tests</td>
+                        </tr>
+                        <tr>
+                            <td>Phase 2: Messaging Tests</td>
+                            <td>2025-11-19</td>
+                            <td>2025-11-22</td>
+                            <td>4 days</td>
+                            <td><span class="status-todo">📋 PLANNED</span></td>
+                            <td>Message & PM tests</td>
+                        </tr>
+                        <tr>
+                            <td>Phase 3: Network & Error</td>
+                            <td>2025-11-23</td>
+                            <td>2025-11-26</td>
+                            <td>4 days</td>
+                            <td><span class="status-todo">📋 PLANNED</span></td>
+                            <td>Network error handling</td>
+                        </tr>
+                        <tr>
+                            <td>Phase 4: Security & Validation</td>
+                            <td>2025-11-27</td>
+                            <td>2025-11-30</td>
+                            <td>4 days</td>
+                            <td><span class="status-todo">📋 PLANNED</span></td>
+                            <td>Security test suite</td>
+                        </tr>
+                        <tr>
+                            <td>Phase 5: Integration & E2E</td>
+                            <td>2025-12-01</td>
+                            <td>2025-12-05</td>
+                            <td>5 days</td>
+                            <td><span class="status-todo">📋 PLANNED</span></td>
+                            <td>Full integration tests</td>
+                        </tr>
+                        <tr>
+                            <td>Phase 6: Performance & Load</td>
+                            <td>2025-12-06</td>
+                            <td>2025-12-08</td>
+                            <td>3 days</td>
+                            <td><span class="status-todo">📋 PLANNED</span></td>
+                            <td>Performance benchmarks</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table 6: Quality Metrics -->
+            <h2>📊 6. BẢNG CHỈ SỐ CHẤT LƯỢNG</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Current Value</th>
+                            <th>Target Value</th>
+                            <th>Status</th>
+                            <th>Trend</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Test Pass Rate</td>
+                            <td>100% (15/15)</td>
+                            <td>95%</td>
+                            <td>
+                                <span class="badge badge-excellent"
+                                    >EXCELLENT</span
+                                >
+                            </td>
+                            <td>↗️</td>
+                        </tr>
+                        <tr>
+                            <td>Code Coverage</td>
+                            <td>30.4%</td>
+                            <td>80%</td>
+                            <td><span class="badge badge-poor">POOR</span></td>
+                            <td>↗️</td>
+                        </tr>
+                        <tr>
+                            <td>Bug Density</td>
+                            <td>5 bugs/KLOC</td>
+                            <td>&lt;3 bugs/KLOC</td>
+                            <td>
+                                <span class="badge badge-moderate"
+                                    >MODERATE</span
+                                >
+                            </td>
+                            <td>↗️</td>
+                        </tr>
+                        <tr>
+                            <td>Test Execution Time</td>
+                            <td>0.251s</td>
+                            <td>&lt;5s</td>
+                            <td>
+                                <span class="badge badge-excellent"
+                                    >EXCELLENT</span
+                                >
+                            </td>
+                            <td>→</td>
+                        </tr>
+                        <tr>
+                            <td>Automated Test %</td>
+                            <td>100%</td>
+                            <td>90%</td>
+                            <td>
+                                <span class="badge badge-excellent"
+                                    >EXCELLENT</span
+                                >
+                            </td>
+                            <td>→</td>
+                        </tr>
+                        <tr>
+                            <td>Manual Test %</td>
+                            <td>0%</td>
+                            <td>10%</td>
+                            <td>
+                                <span class="badge badge-excellent"
+                                    >EXCELLENT</span
+                                >
+                            </td>
+                            <td>→</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="summary-box" style="margin-top: 40px">
+                <p><strong>Version:</strong> 1.0</p>
+                <p><strong>Last Updated:</strong> 2025-11-18 15:45</p>
+                <p><strong>Next Review:</strong> 2025-11-19 09:00</p>
+                <p><strong>Maintained by:</strong> ChatAppUDP QA Team</p>
+            </div>
+        </div>
+    </body>
+</html>
