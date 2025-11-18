@@ -15,6 +15,7 @@ public class ServerController {
     private Map<String, InetSocketAddress> connectedClients;
     private ExecutorService threadPool;
     private ServerHandler serverHandler;
+    private Object serverUI; // Tránh import circular dependency
     
     public ServerController() {
         this.port = Constants.DEFAULT_PORT;
@@ -29,6 +30,34 @@ public class ServerController {
     }
     
     /**
+     * Set UI reference để có thể log messages
+     */
+    public void setServerUI(Object ui) {
+        this.serverUI = ui;
+    }
+    
+    /**
+     * Log message vào UI hoặc console
+     */
+    public void log(String message) {
+        String logMessage = "[" + Utils.getCurrentTimeString() + "] " + message;
+        
+        // In ra console
+        System.out.println(logMessage);
+        
+        // Gửi đến UI nếu có
+        if (serverUI != null) {
+            try {
+                // Sử dụng reflection để tránh circular import
+                java.lang.reflect.Method appendLogMethod = serverUI.getClass().getMethod("appendLog", String.class);
+                appendLogMethod.invoke(serverUI, logMessage);
+            } catch (Exception e) {
+                // Nếu không có UI hoặc có lỗi, chỉ log ra console
+            }
+        }
+    }
+    
+    /**
      * Khởi động server
      */
     public boolean startServer() {
@@ -39,10 +68,10 @@ public class ServerController {
             // Khởi động thread lắng nghe
             threadPool.submit(this::listenForMessages);
             
-            System.out.println("Server started on port " + port);
+            log("Server started on port " + port);
             return true;
         } catch (Exception e) {
-            System.err.println("Error starting server: " + e.getMessage());
+            log("Error starting server: " + e.getMessage());
             return false;
         }
     }
@@ -69,7 +98,7 @@ public class ServerController {
         }
         
         connectedClients.clear();
-        System.out.println("Server stopped");
+        log("Server stopped");
     }
     
     /**
@@ -88,7 +117,7 @@ public class ServerController {
                 
             } catch (Exception e) {
                 if (isRunning) {
-                    System.err.println("Error receiving message: " + e.getMessage());
+                    log("Error receiving message: " + e.getMessage());
                 }
             }
         }
@@ -108,7 +137,7 @@ public class ServerController {
             
             socket.send(packet);
         } catch (Exception e) {
-            System.err.println("Error sending message to client: " + e.getMessage());
+            log("Error sending message to client: " + e.getMessage());
         }
     }
     
@@ -135,32 +164,85 @@ public class ServerController {
     /**
      * Thêm client mới
      */
-    public void addClient(String username, InetSocketAddress address) {
-        connectedClients.put(username, address);
-        System.out.println("Client connected: " + username + " from " + address);
-        
-        // Gửi thông báo user joined
-        Message joinMessage = Utils.createSystemMessage(username + " joined the chat");
-        broadcastMessage(joinMessage, username);
-        
-        // Gửi danh sách users cho tất cả clients
-        broadcastUserList();
+    public synchronized void addClient(String username, InetSocketAddress address) {
+        try {
+            // Kiểm tra lại để đảm bảo
+            if (connectedClients.containsKey(username)) {
+                System.err.println("Warning: Attempted to add duplicate username: " + username);
+                return;
+            }
+            
+            connectedClients.put(username, address);
+            log("Client added: " + username + " from " + address + 
+                             " (Total clients: " + connectedClients.size() + ")");
+            
+            // Gửi thông báo user joined
+            Message joinMessage = Utils.createSystemMessage(username + " joined the chat");
+            broadcastMessage(joinMessage, username);
+            
+            // Gửi danh sách users cho tất cả clients
+            broadcastUserList();
+            
+        } catch (Exception e) {
+            log("Error adding client " + username + ": " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     /**
+     * Kick user khỏi server (admin function)
+     */
+    public synchronized void kickUser(String username) {
+        try {
+            if (!connectedClients.containsKey(username)) {
+                log("Attempted to kick non-existent user: " + username);
+                return;
+            }
+            
+            // Gửi notification đến user bị kick
+            InetSocketAddress userAddress = connectedClients.get(username);
+            if (userAddress != null) {
+                Message kickMessage = new Message(
+                    Constants.MESSAGE_TYPE_NOTIFICATION,
+                    "SERVER",
+                    "You have been kicked from the server by admin."
+                );
+                sendToClient(kickMessage, userAddress);
+            }
+            
+            // Remove user khỏi danh sách
+            removeClient(username);
+            
+            log("Admin kicked user: " + username);
+            
+        } catch (Exception e) {
+            log("Error kicking user " + username + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Xóa client
      */
-    public void removeClient(String username) {
-        InetSocketAddress removed = connectedClients.remove(username);
-        if (removed != null) {
-            System.out.println("Client disconnected: " + username);
-            
-            // Thông báo user left
-            Message leaveMessage = Utils.createSystemMessage(username + " left the chat");
-            broadcastMessage(leaveMessage);
-            
-            // Cập nhật danh sách users cho tất cả clients
-            broadcastUserList();
+    public synchronized void removeClient(String username) {
+        try {
+            InetSocketAddress removed = connectedClients.remove(username);
+            if (removed != null) {
+                log("Client removed: " + username + 
+                                 " (Remaining clients: " + connectedClients.size() + ")");
+                
+                // Thông báo user left
+                Message leaveMessage = Utils.createSystemMessage(username + " left the chat");
+                broadcastMessage(leaveMessage);
+                
+                // Cập nhật danh sách users cho tất cả clients
+                broadcastUserList();
+            } else {
+                log("Attempted to remove non-existent client: " + username);
+            }
+        } catch (Exception e) {
+            log("Error removing client " + username + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
     
@@ -183,29 +265,48 @@ public class ServerController {
         );
         
         sendToClient(userListMessage, clientAddress);
-        System.out.println("Sent user list to client: " + clientAddress + " - Users: " + userList.toString());
+        log("Sent user list to client: " + clientAddress + " - Users: " + userList.toString());
     }
     
     /**
      * Broadcast danh sách users cho tất cả clients
      */
-    public void broadcastUserList() {
-        StringBuilder userList = new StringBuilder();
-        for (String username : connectedClients.keySet()) {
-            if (userList.length() > 0) {
-                userList.append(",");
+    public synchronized void broadcastUserList() {
+        try {
+            StringBuilder userList = new StringBuilder();
+            for (String username : connectedClients.keySet()) {
+                if (userList.length() > 0) {
+                    userList.append(",");
+                }
+                userList.append(username);
             }
-            userList.append(username);
+            
+            Message userListMessage = new Message(
+                Constants.MESSAGE_TYPE_USER_LIST, 
+                "SERVER", 
+                userList.toString()
+            );
+            
+            log("Broadcasting user list to " + connectedClients.size() + 
+                             " clients - Users: " + userList.toString());
+            
+            // Gửi từng client một để tránh lỗi
+            int successCount = 0;
+            for (Map.Entry<String, InetSocketAddress> entry : connectedClients.entrySet()) {
+                try {
+                    sendToClient(userListMessage, entry.getValue());
+                    successCount++;
+                } catch (Exception e) {
+                    log("Failed to send user list to " + entry.getKey() + ": " + e.getMessage());
+                }
+            }
+            
+            log("User list sent to " + successCount + "/" + connectedClients.size() + " clients");
+            
+        } catch (Exception e) {
+            log("Error broadcasting user list: " + e.getMessage());
+            e.printStackTrace();
         }
-        
-        Message userListMessage = new Message(
-            Constants.MESSAGE_TYPE_USER_LIST, 
-            "SERVER", 
-            userList.toString()
-        );
-        
-        System.out.println("Broadcasting user list to " + connectedClients.size() + " clients - Users: " + userList.toString());
-        broadcastMessage(userListMessage);
     }
     
     // Getters

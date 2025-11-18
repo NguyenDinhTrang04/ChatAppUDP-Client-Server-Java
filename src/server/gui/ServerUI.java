@@ -20,14 +20,27 @@ public class ServerUI extends JFrame {
     private JButton startButton;
     private JButton stopButton;
     private JTextArea logArea;
-    private JTextArea clientListArea;
+    private JList<String> clientList;
+    private DefaultListModel<String> clientListModel;
+    private JButton kickUserButton;
     private JLabel statusLabel;
     private JLabel clientCountLabel;
     
     public ServerUI() {
         serverController = new ServerController();
+        serverController.setServerUI(this);
         initializeUI();
         setupEventHandlers();
+    }
+    
+    /**
+     * Public method để ServerController có thể gọi để log
+     */
+    public void appendLog(String message) {
+        SwingUtilities.invokeLater(() -> {
+            logArea.append(message + "\n");
+            logArea.setCaretPosition(logArea.getDocument().getLength());
+        });
     }
     
     /**
@@ -111,13 +124,27 @@ public class ServerUI extends JFrame {
         JPanel clientPanel = new JPanel(new BorderLayout());
         clientPanel.setBorder(BorderFactory.createTitledBorder("Connected Clients"));
         
-        clientListArea = new JTextArea();
-        clientListArea.setEditable(false);
-        clientListArea.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+        // Client list với selection
+        clientListModel = new DefaultListModel<>();
+        clientList = new JList<>(clientListModel);
+        clientList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        clientList.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
         
-        JScrollPane clientScrollPane = new JScrollPane(clientListArea);
+        // Context menu cho kick user
+        JPopupMenu contextMenu = new JPopupMenu();
+        JMenuItem kickMenuItem = new JMenuItem("Kick User");
+        kickMenuItem.addActionListener(e -> kickSelectedUser());
+        contextMenu.add(kickMenuItem);
+        clientList.setComponentPopupMenu(contextMenu);
+        
+        JScrollPane clientScrollPane = new JScrollPane(clientList);
         clientScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         clientPanel.add(clientScrollPane, BorderLayout.CENTER);
+        
+        // Kick user button
+        kickUserButton = new JButton("Kick Selected User");
+        kickUserButton.setEnabled(false);
+        clientPanel.add(kickUserButton, BorderLayout.SOUTH);
         
         // Split pane
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, logPanel, clientPanel);
@@ -166,6 +193,21 @@ public class ServerUI extends JFrame {
             }
         });
         
+        // Kick user button
+        kickUserButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                kickSelectedUser();
+            }
+        });
+        
+        // Client list selection listener
+        clientList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                kickUserButton.setEnabled(clientList.getSelectedValue() != null);
+            }
+        });
+        
         // Window closing
         addWindowListener(new WindowAdapter() {
             @Override
@@ -202,6 +244,7 @@ public class ServerUI extends JFrame {
             
             int port = Integer.parseInt(portText);
             serverController = new ServerController(port);
+            serverController.setServerUI(this);
             
             if (serverController.startServer()) {
                 startButton.setEnabled(false);
@@ -242,7 +285,8 @@ public class ServerUI extends JFrame {
             portField.setEnabled(true);
             
             statusLabel.setText("Server stopped");
-            clientListArea.setText("");
+            clientListModel.clear();
+            kickUserButton.setEnabled(false);
             updateClientCount();
             
             appendLog("Server stopped");
@@ -261,15 +305,54 @@ public class ServerUI extends JFrame {
     }
     
     /**
+     * Kick user được chọn
+     */
+    private void kickSelectedUser() {
+        String selectedUser = clientList.getSelectedValue();
+        if (selectedUser == null || selectedUser.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "Please select a user to kick.",
+                "No User Selected",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Are you sure you want to kick user '" + selectedUser + "'?",
+            "Confirm Kick User",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE);
+            
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                serverController.kickUser(selectedUser);
+                appendLog("Admin kicked user: " + selectedUser);
+                
+                JOptionPane.showMessageDialog(this,
+                    "User '" + selectedUser + "' has been kicked from the server.",
+                    "User Kicked",
+                    JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception e) {
+                appendLog("Error kicking user " + selectedUser + ": " + e.getMessage());
+                JOptionPane.showMessageDialog(this,
+                    "Error kicking user: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+    
+    /**
      * Cập nhật danh sách clients
      */
     private void updateClientList() {
         if (serverController != null && serverController.isRunning()) {
-            StringBuilder sb = new StringBuilder();
-            for (String username : serverController.getConnectedUsers()) {
-                sb.append(username).append("\n");
-            }
-            clientListArea.setText(sb.toString());
+            SwingUtilities.invokeLater(() -> {
+                clientListModel.clear();
+                for (String username : serverController.getConnectedUsers()) {
+                    clientListModel.addElement(username);
+                }
+            });
         }
     }
     
@@ -282,9 +365,9 @@ public class ServerUI extends JFrame {
     }
     
     /**
-     * Thêm log vào text area
+     * Thêm log message vào log area (private)
      */
-    private void appendLog(String message) {
+    private void appendLogMessage(String message) {
         SwingUtilities.invokeLater(() -> {
             String timestamp = Utils.getCurrentTimeString();
             logArea.append("[" + timestamp + "] " + message + "\n");

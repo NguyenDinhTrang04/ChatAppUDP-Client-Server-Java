@@ -224,13 +224,24 @@ public class ChatUI extends JFrame implements ClientController.MessageListener {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
         panel.setBorder(BorderFactory.createTitledBorder("Send Message"));
         
+        // Instructions label
+        JLabel instructionsLabel = new JLabel("Type your message. Use @username message for private messages.");
+        instructionsLabel.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 10));
+        instructionsLabel.setForeground(Color.GRAY);
+        
         messageField = new JTextField();
         messageField.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+        messageField.setToolTipText("Type @username message for private messages");
         
         sendButton = new JButton("Send");
         sendButton.setPreferredSize(new Dimension(80, 30));
         
-        panel.add(messageField, BorderLayout.CENTER);
+        // Create a sub panel for instructions and message field
+        JPanel inputPanel = new JPanel(new BorderLayout(2, 2));
+        inputPanel.add(instructionsLabel, BorderLayout.NORTH);
+        inputPanel.add(messageField, BorderLayout.CENTER);
+        
+        panel.add(inputPanel, BorderLayout.CENTER);
         panel.add(sendButton, BorderLayout.EAST);
         
         return panel;
@@ -367,8 +378,21 @@ public class ChatUI extends JFrame implements ClientController.MessageListener {
             int spaceIndex = message.indexOf(' ');
             if (spaceIndex > 1) {
                 String recipient = message.substring(1, spaceIndex);
-                String content = message.substring(spaceIndex + 1);
+                String content = message.substring(spaceIndex + 1).trim();
+                
+                if (content.isEmpty()) {
+                    JOptionPane.showMessageDialog(this,
+                        "Please enter a message after the username.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                // Hiển thị tin nhắn private trong chat area
+                appendToChatArea("[Private to " + recipient + "] " + content);
+                
                 clientController.sendTextMessage(content, recipient);
+                System.out.println("Sending private message to " + recipient + ": " + content);
             } else {
                 JOptionPane.showMessageDialog(this,
                     "Invalid private message format. Use: @username message",
@@ -377,10 +401,12 @@ public class ChatUI extends JFrame implements ClientController.MessageListener {
                 return;
             }
         } else {
+            // Public message
             clientController.sendTextMessage(message);
         }
         
         messageField.setText("");
+        messageField.requestFocus();
     }
     
     /**
@@ -389,9 +415,26 @@ public class ChatUI extends JFrame implements ClientController.MessageListener {
     private void startPrivateMessage() {
         String selectedUser = userList.getSelectedValue();
         if (selectedUser != null && !selectedUser.equals(clientController.getUsername())) {
-            messageField.setText("@" + selectedUser + " ");
+            String currentText = messageField.getText().trim();
+            
+            // Clear existing @username if present
+            if (currentText.startsWith("@")) {
+                int spaceIndex = currentText.indexOf(' ');
+                if (spaceIndex > 0) {
+                    currentText = currentText.substring(spaceIndex + 1).trim();
+                } else {
+                    currentText = "";
+                }
+            }
+            
+            // Set new private message format
+            String newText = "@" + selectedUser + " " + currentText;
+            messageField.setText(newText);
             messageField.requestFocus();
             messageField.setCaretPosition(messageField.getText().length());
+            
+            // Show notification
+            statusLabel.setText("Private message to: " + selectedUser);
         }
     }
     

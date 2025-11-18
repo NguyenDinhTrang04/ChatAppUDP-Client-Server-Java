@@ -60,49 +60,70 @@ public class ServerHandler {
     private void handleJoinRequest(Message message, InetSocketAddress clientAddress) {
         String username = message.getSender();
         
-        if (!Utils.isValidUsername(username)) {
-            // Gửi thông báo lỗi về client
-            Message errorMessage = new Message(
-                Constants.MESSAGE_TYPE_NOTIFICATION,
-                "SERVER",
-                "Invalid username. Username must be 2-20 characters and not contain special characters."
-            );
-            serverController.sendToClient(errorMessage, clientAddress);
-            return;
+        // Synchronize để tránh race condition
+        synchronized (serverController) {
+            serverController.log("Processing JOIN request for user: " + username + " from " + clientAddress);
+            
+            if (!Utils.isValidUsername(username)) {
+                // Gửi thông báo lỗi về client
+                Message errorMessage = new Message(
+                    Constants.MESSAGE_TYPE_NOTIFICATION,
+                    "SERVER",
+                    "Invalid username. Username must be 2-20 characters and not contain special characters."
+                );
+                serverController.sendToClient(errorMessage, clientAddress);
+                serverController.log("Rejected invalid username: " + username);
+                return;
+            }
+            
+            // Kiểm tra username đã tồn tại chưa
+            if (serverController.getConnectedUsers().contains(username)) {
+                Message errorMessage = new Message(
+                    Constants.MESSAGE_TYPE_NOTIFICATION,
+                    "SERVER",
+                    "Username already exists. Please choose another username."
+                );
+                serverController.sendToClient(errorMessage, clientAddress);
+                serverController.log("Rejected duplicate username: " + username);
+                return;
+            }
+            
+            try {
+                // Thêm client vào danh sách (sẽ broadcast user list cho tất cả clients)
+                serverController.addClient(username, clientAddress);
+                
+                // Gửi thông báo thành công
+                Message successMessage = new Message(
+                    Constants.MESSAGE_TYPE_NOTIFICATION,
+                    "SERVER",
+                    "Successfully joined the chat!"
+                );
+                serverController.sendToClient(successMessage, clientAddress);
+                
+                // Delay để đảm bảo client đã sẵn sàng nhận
+                Thread.sleep(200); // Tăng delay lên 200ms
+                
+                // Gửi user list cho client mới
+                serverController.sendUserListToClient(clientAddress);
+                
+                serverController.log("User " + username + " successfully joined from " + clientAddress + 
+                                 " (Total clients: " + serverController.getClientCount() + ")");
+                
+            } catch (Exception e) {
+                serverController.log("Error processing join request for " + username + ": " + e.getMessage());
+                e.printStackTrace();
+                
+                // Cleanup nếu có lỗi
+                serverController.removeClient(username);
+                
+                Message errorMessage = new Message(
+                    Constants.MESSAGE_TYPE_NOTIFICATION,
+                    "SERVER",
+                    "Server error. Please try again."
+                );
+                serverController.sendToClient(errorMessage, clientAddress);
+            }
         }
-        
-        // Kiểm tra username đã tồn tại chưa
-        if (serverController.getConnectedUsers().contains(username)) {
-            Message errorMessage = new Message(
-                Constants.MESSAGE_TYPE_NOTIFICATION,
-                "SERVER",
-                "Username already exists. Please choose another username."
-            );
-            serverController.sendToClient(errorMessage, clientAddress);
-            return;
-        }
-        
-        // Thêm client vào danh sách (sẽ broadcast user list cho tất cả clients)
-        serverController.addClient(username, clientAddress);
-        
-        // Gửi thông báo thành công
-        Message successMessage = new Message(
-            Constants.MESSAGE_TYPE_NOTIFICATION,
-            "SERVER",
-            "Successfully joined the chat!"
-        );
-        serverController.sendToClient(successMessage, clientAddress);
-        
-        // Đảm bảo client mới nhận được danh sách user hiện tại (gửi lại để chắc chắn)
-        // Delay nhỏ để đảm bảo client đã sẵn sàng nhận
-        try {
-            Thread.sleep(100); // 100ms delay
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        serverController.sendUserListToClient(clientAddress);
-        
-        System.out.println("User " + username + " joined from " + clientAddress);
     }
     
     /**
@@ -152,40 +173,59 @@ public class ServerHandler {
         String recipient = message.getRecipient().trim();
         String sender = message.getSender();
         
+        System.out.println("Processing private message from " + sender + " to " + recipient);
+        
         // Kiểm tra recipient có tồn tại không
         if (!serverController.getConnectedUsers().contains(recipient)) {
             // Gửi thông báo lỗi về sender
             Message errorMessage = new Message(
                 Constants.MESSAGE_TYPE_NOTIFICATION,
                 "SERVER",
-                "User " + recipient + " not found."
+                "User " + recipient + " not found or not online."
             );
             
             InetSocketAddress senderAddress = serverController.getConnectedClients().get(sender);
             if (senderAddress != null) {
                 serverController.sendToClient(errorMessage, senderAddress);
+                System.out.println("Sent error message to " + sender + ": User " + recipient + " not found");
             }
             return;
         }
         
-        // Gửi tin nhắn đến recipient
-        InetSocketAddress recipientAddress = serverController.getConnectedClients().get(recipient);
-        if (recipientAddress != null) {
-            serverController.sendToClient(message, recipientAddress);
-            
-            // Gửi confirmation về sender
-            Message confirmMessage = new Message(
-                Constants.MESSAGE_TYPE_NOTIFICATION,
-                "SERVER",
-                "Private message sent to " + recipient
+        try {
+            // Tạo private message với format đặc biệt
+            Message privateMessage = new Message(
+                Constants.MESSAGE_TYPE_TEXT,
+                sender,
+                "[Private] " + message.getContent()
             );
+            privateMessage.setRecipient(recipient);
             
-            InetSocketAddress senderAddress = serverController.getConnectedClients().get(sender);
-            if (senderAddress != null) {
-                serverController.sendToClient(confirmMessage, senderAddress);
+            // Gửi tin nhắn đến recipient
+            InetSocketAddress recipientAddress = serverController.getConnectedClients().get(recipient);
+            if (recipientAddress != null) {
+                serverController.sendToClient(privateMessage, recipientAddress);
+                
+                // Gửi confirmation về sender
+                Message confirmMessage = new Message(
+                    Constants.MESSAGE_TYPE_NOTIFICATION,
+                    "SERVER",
+                    "Private message delivered to " + recipient
+                );
+                
+                InetSocketAddress senderAddress = serverController.getConnectedClients().get(sender);
+                if (senderAddress != null) {
+                    serverController.sendToClient(confirmMessage, senderAddress);
+                }
+                
+                System.out.println("Private message delivered: " + sender + " -> " + recipient + ": " + message.getContent());
+            } else {
+                System.err.println("Could not get address for recipient: " + recipient);
             }
             
-            System.out.println("Private message from " + sender + " to " + recipient + ": " + message.getContent());
+        } catch (Exception e) {
+            System.err.println("Error handling private message from " + sender + " to " + recipient + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

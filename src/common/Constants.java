@@ -5,7 +5,7 @@ package common;
  */
 public class Constants {
     // Cấu hình mạng
-    public static final String DEFAULT_HOST = "26.189.120.180";
+    public static final String DEFAULT_HOST = "localhost";
     public static final int DEFAULT_PORT = 8888;
     public static final int BUFFER_SIZE = 1024;
     
