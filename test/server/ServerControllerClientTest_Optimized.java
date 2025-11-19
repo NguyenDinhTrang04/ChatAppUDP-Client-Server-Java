@@ -72,7 +72,7 @@ public class ServerControllerClientTest {
         assertTrue("User phải có trong danh sách", connectedUsers.contains(username));
         assertEquals("Client count phải là 1", 1, serverController.getClientCount());
         
-        Map<String, InetSocketAddress> clients = serverController.getConnectedClients();
+        Map<String> InetSocketAddress> clients = serverController.getConnectedClients();
         assertEquals("Địa chỉ client phải đúng", testAddress1, clients.get(username));
     }
     

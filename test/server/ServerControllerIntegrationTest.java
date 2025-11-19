@@ -9,8 +9,13 @@ import java.util.Set;
 import common.*;
 
 /**
- * Integration Tests cho chức năng Add/Remove Client
- * Test tương tác giữa các components
+ * Integration Tests cho 3 chức năng quản lý Client:
+ * - ADD CLIENT: Thêm client vào server
+ * - REMOVE CLIENT: Xóa client khỏi server
+ * - KICK USER: Kick client (remove + notification)
+ * 
+ * Tests tích hợp giữa ServerController, UI logging, và user list broadcasting
+ * Verify end-to-end workflows và component interactions
  */
 public class ServerControllerIntegrationTest {
     
@@ -31,8 +36,15 @@ public class ServerControllerIntegrationTest {
         }
     }
     
+    // ========================================================================
+    // INTEGRATION TESTS (TC_INT_001 - TC_INT_003)
+    // ========================================================================
+    
     /**
-     * Test full workflow: start server -> add clients -> remove clients -> stop server
+     * TC_INT_001: Full client lifecycle workflow
+     * Priority: High
+     * Workflow: Start -> Add clients -> Remove -> Kick -> Stop
+     * Expected: All operations work together seamlessly
      */
     @Test
     public void testFullClientLifecycle() {
@@ -76,7 +88,9 @@ public class ServerControllerIntegrationTest {
     }
     
     /**
-     * Test logging integration với UI
+     * TC_INT_002: Logging integration với ServerUI
+     * Priority: High
+     * Expected: Add/Remove operations được log chính xác
      */
     @Test
     public void testLoggingIntegration() {
@@ -96,7 +110,9 @@ public class ServerControllerIntegrationTest {
     }
     
     /**
-     * Test user list broadcasting
+     * TC_INT_003: User list broadcasting sau Add/Remove
+     * Priority: High
+     * Expected: User list được broadcast và update đúng
      */
     @Test
     public void testUserListBroadcasting() {
@@ -125,8 +141,13 @@ public class ServerControllerIntegrationTest {
                    mockUI.hasLogContaining("broadcast2"));
     }
     
+    // ========================================================================
+    // MOCK CLASSES
+    // ========================================================================
+    
     /**
-     * Mock UI class để test logging
+     * Mock ServerUI để capture và verify log messages
+     * Supports: appendLog(), clearLogs(), hasLogContaining()
      */
     private static class MockServerUI {
         private StringBuilder logs = new StringBuilder();
@@ -147,4 +168,25 @@ public class ServerControllerIntegrationTest {
             return logs.toString();
         }
     }
+    
+    // ========================================================================
+    // TEST EXECUTION SUMMARY
+    // ========================================================================
+    // Total Integration Tests: 3
+    //
+    // INTEGRATION TESTS (3 tests):
+    //   TC_INT_001: testFullClientLifecycle - End-to-end workflow
+    //   TC_INT_002: testLoggingIntegration - UI logging verification
+    //   TC_INT_003: testUserListBroadcasting - User list updates
+    //
+    // Test Coverage:
+    //   ✅ Full lifecycle: Start -> Add -> Remove -> Kick -> Stop
+    //   ✅ ServerController + ServerUI integration
+    //   ✅ User list broadcasting mechanism
+    //   ✅ Log message verification
+    //
+    // Run Commands:
+    //   All tests: java -cp "bin;test-bin;lib/*" org.junit.runner.JUnitCore server.ServerControllerIntegrationTest
+    //   Individual: Use run-individual-tests.bat or run-individual-tests.ps1
+    // ========================================================================
 }
